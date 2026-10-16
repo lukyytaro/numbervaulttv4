@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#080a0f">
+<title>Nomor Vault Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236d5ff0'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%8C%81%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+    color-scheme:dark;
+    --bg:#080a0f;--bg2:#0c1017;--surface:#121722;--surface2:#171e2d;
+    --line:#273044;--line2:#36425c;
+    --text:#f2f5fb;--muted:#9aa4b8;
+    --accent:#6d5ff0;--accent2:#8d82ff;--accent-soft:#1a1840;
+    --ok:#55d6b0;--warn:#f2c46d;--danger:#ff7187;--danger-bg:#3a1620;
+    --t-exclusive:#8d82ff;--t-standard:#55d6b0;--t-low:#f2c46d;--t-agent:#ff9f6e;--t-none:#7b879e;
+    --r:16px;--r-sm:11px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+h1,h2,p{margin:0}
+button,a{font:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+
+.appbar{position:sticky;top:0;z-index:30;background:rgba(8,10,15,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.appbar-in{max-width:1100px;margin:auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--accent);display:grid;place-items:center;font-size:22px;flex:none}
+.brand h1{font-size:17px;font-weight:800}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:6px 14px;border-radius:11px;border:1px solid var(--line2);background:var(--surface2);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--accent2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+main{max-width:1100px;margin:auto;padding:14px 14px 40px;display:grid;gap:14px}
+.note{padding:11px 13px;border-radius:var(--r-sm);border:1px solid #5b4919;background:#211b0d;color:#f2d99b;font-size:13.5px}
+.note.error{border-color:#5b2a36;background:var(--danger-bg);color:#ffb3c0}
+.note.info{border-color:var(--line2);background:var(--bg2);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card h2{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi b{display:block;font-size:28px;margin-top:3px;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--muted);font-size:12px}
+
+.bars{display:grid;gap:11px}
+.bar-row{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;font-size:13.5px}
+.bar{height:12px;border-radius:7px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:7px;background:var(--accent)}
+.bar-row b{font-variant-numeric:tabular-nums}
+.progress{height:8px;background:var(--bg2);border-radius:9px;overflow:hidden;min-width:70px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--ok))}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:8px}
+.item{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
+.item b{overflow-wrap:anywhere}
+.empty{text-align:center;padding:30px 14px;color:var(--muted)}
+.empty b{display:block;color:var(--text);font-size:16px;margin-bottom:4px}
+.spinner{width:18px;height:18px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--accent2);animation:spin .8s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+
+@media(max-width:640px){
+    .kpis{grid-template-columns:1fr 1fr}
+    .kpi:last-child{grid-column:1/-1}
+    .bar-row{grid-template-columns:78px 1fr auto}
+    table,thead,tbody,tr,td{display:block}
+    thead{display:none}
+    tr{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg2);padding:8px 10px;margin-bottom:9px}
+    td{border:0;padding:4px 0;display:flex;justify-content:space-between;gap:12px;text-align:right}
+    td::before{content:attr(data-label);color:var(--muted);text-align:left;flex:none}
+    td.n{text-align:right}
+    td.name{font-weight:800;font-size:15px;text-align:left;display:block}
+    td.name::before{content:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header class="appbar">
+    <div class="appbar-in">
+        <div class="brand"><div class="logo" aria-hidden="true">⌁</div><div><h1>Nomor Vault Admin</h1><span class="small" id="updated">Dashboard lokal</span></div></div>
+        <div class="row">
+            <button class="btn" id="refresh" type="button">↻ Muat ulang</button>
+            <a class="btn" href="../public/index.html">← Aplikasi</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="note">
+        Dashboard lokal: hanya menampilkan data di browser ini. Admin tidak dapat melihat data browser pengguna lain.
+        Statistik global lintas pengguna membutuhkan backend/database.
+    </div>
+    <div id="alerts" style="display:grid;gap:10px"></div>
+
+    <div id="loading" class="card"><span class="spinner" aria-hidden="true"></span> Memuat data…</div>
+    <div id="error" class="card" hidden>
+        <div class="empty"><b>Data tidak bisa dimuat</b><span id="errorText"></span><div style="margin-top:14px"><button class="btn" id="retry" type="button">↻ Coba lagi</button></div></div>
+    </div>
+    <div id="empty" class="card" hidden>
+        <div class="empty"><b>Belum ada data</b>Upload file TXT di aplikasi utama untuk mulai melihat statistik.<div style="margin-top:14px"><a class="btn" href="../public/index.html">Buka aplikasi</a></div></div>
+    </div>
+
+    <div id="content" hidden style="display:grid;gap:14px">
+        <section class="kpis" aria-label="Ringkasan">
+            <div class="kpi"><span>Files</span><b id="files">0</b></div>
+            <div class="kpi"><span>Numbers</span><b id="numbers">0</b><small id="numbersSub"></small></div>
+            <div class="kpi"><span>Belum terambil</span><b id="remaining">0</b><small id="remainingSub"></small></div>
+            <div class="kpi"><span>Extracted</span><b id="extracted">0</b><small id="extractedSub"></small></div>
+            <div class="kpi"><span>Batches</span><b id="batches">0</b></div>
+        </section>
+
+        <section class="card">
+            <h2>Stok per tier <span class="small">semua nomor, belum terambil</span></h2>
+            <div id="tiers" class="bars"></div>
+        </section>
+
+        <section class="card">
+            <h2>Per negara</h2>
+            <div class="table-wrap"><table role="table">
+                <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Negara</th><th class="n" role="columnheader" scope="col">File</th><th class="n" role="columnheader" scope="col">Total</th><th class="n" role="columnheader" scope="col">Terambil</th><th class="n" role="columnheader" scope="col">Belum terambil</th></tr></thead>
+                <tbody id="countries" role="rowgroup"></tbody>
+            </table></div>
+        </section>
+
+        <section class="card">
+            <h2>Per workspace</h2>
+            <div class="table-wrap"><table role="table">
+                <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Workspace</th><th role="columnheader" scope="col">Negara</th><th class="n" role="columnheader" scope="col">Total</th><th class="n" role="columnheader" scope="col">Business</th><th class="n" role="columnheader" scope="col">Terambil</th><th class="n" role="columnheader" scope="col">Belum terambil</th><th class="n" role="columnheader" scope="col">Batch</th><th role="columnheader" scope="col">Progres</th><th role="columnheader" scope="col">Aktivitas terakhir</th></tr></thead>
+                <tbody id="workspaces" role="rowgroup"></tbody>
+            </table></div>
+        </section>
+
+        <section class="card">
+            <h2>Batch terbaru</h2>
+            <div id="recent" class="list"></div>
+        </section>
+    </div>
+
+    <section class="card" id="storageCard" hidden>
+        <h2>Penyimpanan</h2>
+        <dl id="storage"></dl>
+        <div id="storageBar" class="progress" style="margin-top:12px" hidden><i></i></div>
+    </section>
+</main>
+
+<script>
+"use strict";
+(() => {
+
+/* ===== STORE: dipakai bersama aplikasi & admin (disisipkan oleh dev/build.mjs, jangan diubah di hasil build) ===== */
+const NV_DB = "nomor-vault";
+const NV_LS = "nvault:";
+const TIER_KEYS = ["exclusive", "standard", "low", "agent", "none"];
+const CODE_TIER = ["none", "exclusive", "standard", "low", "agent"];
+
+const toInt = (x, d = 0) => { x = Number(x); return Number.isFinite(x) ? Math.trunc(x) : d; };
+const isQuota = (e) => !!e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014);
+
+function zeroTiers() { return { exclusive: 0, standard: 0, low: 0, agent: 0, none: 0 }; }
+function cleanTiers(c) {
+    const o = zeroTiers();
+    if (c && typeof c === "object") for (const k of TIER_KEYS) o[k] = Math.max(0, toInt(c[k]));
+    return o;
+}
+
+/* Validasi satu batch riwayat. Data rusak dinormalkan, bukan menyebabkan crash. */
+function cleanBatch(b) {
+    if (!b || typeof b !== "object") return null;
+    const str = (v) => (typeof v === "string" ? v : null);
+    return {
+        n: Math.max(1, toInt(b.n, 1)),
+        ts: str(b.ts),
+        time: str(b.time),
+        count: Math.max(0, toInt(b.count)),
+        source: str(b.source),
+        tier: str(b.tier),
+        tierLabel: str(b.tierLabel),
+        order: str(b.order),
+        remaining: b.remaining == null ? null : toInt(b.remaining),
+        remainingTotal: b.remainingTotal == null ? null : toInt(b.remainingTotal),
+        filename: str(b.filename) || "batch.txt",
+        numbers: Array.isArray(b.numbers) ? b.numbers.filter((x) => typeof x === "string") : null
+    };
+}
+
+/* Validasi record workspace. Return null jika tidak bisa dipakai. */
+function sanitizeWs(r) {
+    if (!r || typeof r !== "object" || typeof r.id !== "string" || !r.id) return null;
+    if (!Array.isArray(r.used) || !Array.isArray(r.history)) return null;
+    const history = r.history.map(cleanBatch).filter(Boolean);
+    const countries = {};
+    if (r.countries && typeof r.countries === "object") {
+        for (const k of Object.keys(r.countries)) countries[k] = Math.max(0, toInt(r.countries[k]));
+    }
+    const strOr = (v, d) => (typeof v === "string" && v ? v : d);
+    return {
+        id: r.id,
+        displayName: strOr(r.displayName, "Workspace"),
+        batchBase: strOr(r.batchBase, "Unknown"),
+        originalName: strOr(r.originalName, "-"),
+        country: strOr(r.country, "Unknown"),
+        countries,
+        created: typeof r.created === "string" ? r.created : null,
+        createdText: typeof r.createdText === "string" ? r.createdText : null,
+        updated: typeof r.updated === "string" ? r.updated : null,
+        rev: Math.max(1, toInt(r.rev, 1)),
+        total: Math.max(0, toInt(r.total)),
+        stats: r.stats && typeof r.stats === "object" ? r.stats : null,
+        counts: { all: cleanTiers(r.counts && r.counts.all), biz: cleanTiers(r.counts && r.counts.biz) },
+        usedBy: { all: cleanTiers(r.usedBy && r.usedBy.all), biz: cleanTiers(r.usedBy && r.usedBy.biz) },
+        used: r.used.filter((x) => typeof x === "string"),
+        nextBatch: Math.max(history.length + 1, toInt(r.nextBatch, 1)),
+        history
+    };
+}
+
+/*
+ * Lapisan penyimpanan.
+ * Prioritas: IndexedDB -> localStorage -> memori.
+ * Kolom `rev` dipakai sebagai compare-and-set agar dua tab tidak saling menimpa.
+ */
+const Store = (() => {
+    let kind = "mem";
+    let idb = null;
+    const mem = { ws: new Map(), inv: new Map(), kv: new Map() };
+    const ls = () => window.localStorage;
+    const conflict = () => Object.assign(new Error("conflict"), { name: "ConflictError" });
+    /* Kunci lintas tab (jika browser mendukung) agar read-check-write di localStorage tidak berpacu. */
+    const withLock = (name, fn) => (typeof navigator !== "undefined" && navigator.locks && navigator.locks.request
+        ? navigator.locks.request("nomor-vault:" + name, fn)
+        : fn());
+    const api = { onClose: null };
+    const reqP = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const keyOf = (store, rec) => (store === "kv" ? rec.k : rec.id);
+
+    function idbRun(stores, mode, fn) {
+        return new Promise((resolve, reject) => {
+            let out;
+            const tx = idb.transaction(stores, mode);
+            tx.oncomplete = () => resolve(out);
+            tx.onabort = () => reject(tx.error || new Error("transaksi dibatalkan"));
+            try { out = fn(tx); } catch (e) { try { tx.abort(); } catch (_) { /* sudah selesai */ } reject(e); }
+        });
+    }
+
+    async function open(force) {
+        const want = force || new URLSearchParams(location.search).get("store");
+        if (want === "mem") { kind = "mem"; return kind; }
+        if (want !== "ls" && typeof indexedDB !== "undefined" && indexedDB) {
+            let timer;
+            const opening = new Promise((res, rej) => {
+                const r = indexedDB.open(NV_DB, 1);
+                r.onupgradeneeded = () => {
+                    const d = r.result;
+                    d.createObjectStore("ws", { keyPath: "id" });
+                    d.createObjectStore("inv", { keyPath: "id" });
+                    d.createObjectStore("kv", { keyPath: "k" });
+                };
+                r.onsuccess = () => res(r.result);
+                r.onerror = () => rej(r.error);
+                r.onblocked = () => rej(new Error("IndexedDB diblokir"));
+            });
+            try {
+                idb = await Promise.race([
+                    opening,
+                    new Promise((_, rej) => { timer = setTimeout(() => rej(new Error("IndexedDB timeout")), 5000); })
+                ]);
+                clearTimeout(timer);
+                const closed = () => { try { idb.close(); } catch (_) { /* sudah tertutup */ } if (api.onClose) api.onClose(); };
+                idb.onversionchange = closed;
+                idb.onclose = closed;
+                kind = "idb";
+                return kind;
+            } catch (e) {
+                clearTimeout(timer);
+                // koneksi yang terlambat jadi harus ditutup supaya tidak menggantung
+                opening.then((d) => { try { d.close(); } catch (_) { /* abaikan */ } }, () => { /* sudah ditangani */ });
+                console.warn("IndexedDB tidak tersedia, pakai localStorage:", e);
+                idb = null;
+            }
+        }
+        try {
+            ls().setItem(NV_LS + "probe", "1");
+            ls().removeItem(NV_LS + "probe");
+            kind = "ls";
+        } catch (_) { kind = "mem"; }
+        return kind;
+    }
+
+    async function rawAll(store) {
+        if (kind === "idb") {
+            const st = idb.transaction([store], "readonly").objectStore(store);
+            if (st.getAll) return reqP(st.getAll());
+            return new Promise((res, rej) => {
+                const out = [];
+                const c = st.openCursor();
+                c.onsuccess = () => { const cur = c.result; if (cur) { out.push(cur.value); cur.continue(); } else res(out); };
+                c.onerror = () => rej(c.error);
+            });
+        }
+        if (kind === "ls") {
+            const out = [];
+            const pre = NV_LS + store + ":";
+            for (let i = 0; i < ls().length; i++) {
+                const k = ls().key(i);
+                if (k && k.startsWith(pre)) { try { out.push(JSON.parse(ls().getItem(k))); } catch (_) { out.push(null); } }
+            }
+            return out;
+        }
+        return [...mem[store].values()].map((v) => JSON.parse(JSON.stringify(v)));
+    }
+
+    async function rawGet(store, key) {
+        if (kind === "idb") return reqP(idb.transaction([store], "readonly").objectStore(store).get(key));
+        if (kind === "ls") { const s = ls().getItem(NV_LS + store + ":" + key); return s == null ? undefined : JSON.parse(s); }
+        const v = mem[store].get(key);
+        return v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+    }
+
+    async function rawPutMany(items) {
+        if (kind === "idb") {
+            const stores = [...new Set(items.map((x) => x[0]))];
+            return idbRun(stores, "readwrite", (tx) => { for (const [s, r] of items) tx.objectStore(s).put(r); });
+        }
+        if (kind === "ls") {
+            const done = [];
+            try {
+                for (const [s, r] of items) {
+                    const k = NV_LS + s + ":" + keyOf(s, r);
+                    const prev = ls().getItem(k);
+                    ls().setItem(k, JSON.stringify(r));
+                    done.push([k, prev]);
+                }
+            } catch (e) {
+                for (const [k, prev] of done.reverse()) { try { prev == null ? ls().removeItem(k) : ls().setItem(k, prev); } catch (_) { /* best effort */ } }
+                throw e;
+            }
+            return;
+        }
+        for (const [s, r] of items) mem[s].set(keyOf(s, r), JSON.parse(JSON.stringify(r)));
+    }
+
+    async function allWs() {
+        const raw = await rawAll("ws");
+        const list = [];
+        let bad = 0;
+        for (const r of raw) { const w = sanitizeWs(r); if (w) list.push(w); else bad++; }
+        return { list, bad };
+    }
+
+    async function getInv(id) {
+        const r = await rawGet("inv", id);
+        if (!r || !Array.isArray(r.n) || !Array.isArray(r.f) || r.n.length !== r.f.length) return null;
+        for (let i = 0; i < r.n.length; i++) {
+            if (typeof r.n[i] !== "string" || !Number.isInteger(r.f[i]) || r.f[i] < 0 || r.f[i] > 12) return null;
+        }
+        return { id, n: r.n, f: r.f };
+    }
+
+    /* Simpan workspace baru + inventarisnya secara atomik. */
+    function putNew(ws, inv) { return rawPutMany([["inv", inv], ["ws", ws]]); }
+
+    /* Compare-and-set: ws.rev harus sama dengan rev di storage. Return record baru (rev+1). */
+    async function casWs(ws) {
+        const expect = ws.rev;
+        const next = { ...ws, rev: expect + 1 };
+        if (kind === "idb") {
+            return new Promise((resolve, reject) => {
+                const tx = idb.transaction(["ws"], "readwrite");
+                const st = tx.objectStore("ws");
+                let bad = false;
+                tx.oncomplete = () => resolve(next);
+                tx.onabort = () => reject(bad ? conflict() : tx.error || new Error("transaksi dibatalkan"));
+                const g = st.get(ws.id);
+                g.onsuccess = () => {
+                    const cur = g.result;
+                    if (!cur || toInt(cur.rev, 1) !== expect) { bad = true; tx.abort(); } else st.put(next);
+                };
+            });
+        }
+        return withLock("cas", async () => {
+            const cur = await rawGet("ws", ws.id);
+            if (!cur || toInt(cur.rev, 1) !== expect) throw conflict();
+            await rawPutMany([["ws", next]]);
+            return next;
+        });
+    }
+
+    async function remove(id) {
+        if (kind === "idb") return idbRun(["ws", "inv"], "readwrite", (tx) => { tx.objectStore("ws").delete(id); tx.objectStore("inv").delete(id); });
+        if (kind === "ls") { ls().removeItem(NV_LS + "ws:" + id); ls().removeItem(NV_LS + "inv:" + id); return; }
+        mem.ws.delete(id); mem.inv.delete(id);
+    }
+
+    async function getKv(k) { const r = await rawGet("kv", k); return r ? r.v : undefined; }
+    function setKv(k, v) { return rawPutMany([["kv", { k, v }]]); }
+
+    async function estimate() {
+        try {
+            if (navigator.storage && navigator.storage.estimate) {
+                const e = await navigator.storage.estimate();
+                return { usage: e.usage || 0, quota: e.quota || 0 };
+            }
+        } catch (_) { /* tidak didukung */ }
+        return null;
+    }
+    async function persist() {
+        try { if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist(); } catch (_) { /* abaikan */ }
+        return false;
+    }
+    async function persisted() {
+        try { if (navigator.storage && navigator.storage.persisted) return await navigator.storage.persisted(); } catch (_) { /* abaikan */ }
+        return false;
+    }
+
+    Object.assign(api, { open, allWs, getInv, putNew, casWs, remove, getKv, setKv, estimate, persist, persisted, lock: withLock });
+    Object.defineProperty(api, "kind", { get: () => kind });
+    return api;
+})();
+/* ===== END STORE ===== */
+
+const LEGACY_KEY = "nomor-vault-v3";
+const TIER_LABEL = { exclusive: "Exclusive", standard: "Standard", low: "Low", agent: "Agent AI", none: "Tanpa tier" };
+const $ = (id) => document.getElementById(id);
+const nf = new Intl.NumberFormat("id-ID");
+const fmt = (n) => nf.format(n);
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const esc = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+
+function fmtBytes(b) {
+    if (b < 1024) return b + " B";
+    if (b < 1048576) return (b / 1024).toFixed(0) + " KB";
+    return (b / 1048576).toFixed(b < 10485760 ? 1 : 0) + " MB";
+}
+function fmtTime(iso, fallback) {
+    if (iso) {
+        const d = new Date(iso);
+        if (!isNaN(d)) return d.toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+    return fallback || "-";
+}
+
+function show(which) {
+    $("loading").hidden = which !== "loading";
+    $("error").hidden = which !== "error";
+    $("empty").hidden = which !== "empty";
+    $("content").hidden = which !== "content";
+}
+
+function alertBox(html, type) {
+    const el = document.createElement("div");
+    el.className = "note " + (type || "");
+    el.innerHTML = html;
+    $("alerts").appendChild(el);
+}
+
+function render(list) {
+    const total = sum(list.map((w) => w.total));
+    const used = sum(list.map((w) => w.used.length));
+    const biz = sum(list.map((w) => sum(Object.values(w.counts.biz))));
+    const batches = sum(list.map((w) => w.history.length));
+    const remaining = Math.max(0, total - used);
+
+    $("files").textContent = fmt(list.length);
+    $("numbers").textContent = fmt(total);
+    $("numbersSub").textContent = `${fmt(biz)} Business Meta`;
+    $("remaining").textContent = fmt(remaining);
+    $("remainingSub").textContent = `${pct(remaining, total)}% dari total`;
+    $("extracted").textContent = fmt(used);
+    $("extractedSub").textContent = `${pct(used, total)}% dari total`;
+    $("batches").textContent = fmt(batches);
+
+    // stok per tier
+    const rows = ["exclusive", "standard", "low", "agent", "none"].map((k) => {
+        const t = sum(list.map((w) => w.counts.all[k]));
+        const u = sum(list.map((w) => w.usedBy.all[k]));
+        return { k, t, left: Math.max(0, t - u) };
+    }).filter((r) => r.t > 0);
+    const max = Math.max(1, ...rows.map((r) => r.t));
+    $("tiers").innerHTML = rows.length
+        ? rows.map((r) => `<div class="bar-row"><span>${TIER_LABEL[r.k]}</span><div class="bar" title="${fmt(r.left)} dari ${fmt(r.t)}"><i style="width:${(r.left / max) * 100}%;background:var(--t-${r.k})"></i></div><b>${fmt(r.left)} <span class="small">/ ${fmt(r.t)}</span></b></div>`).join("")
+        : `<div class="small">Belum ada data tier.</div>`;
+
+    // per negara
+    const byC = new Map();
+    for (const w of list) {
+        const c = byC.get(w.country) || { files: 0, total: 0, used: 0 };
+        c.files++; c.total += w.total; c.used += w.used.length;
+        byC.set(w.country, c);
+    }
+    $("countries").innerHTML = [...byC.entries()].sort((a, b) => b[1].total - a[1].total).map(([c, v]) =>
+        `<tr role="row"><td role="cell" class="name">🌍 ${esc(c)}</td><td role="cell" class="n" data-label="File">${fmt(v.files)}</td><td role="cell" class="n" data-label="Total">${fmt(v.total)}</td><td role="cell" class="n" data-label="Terambil">${fmt(v.used)}</td><td role="cell" class="n" data-label="Belum terambil">${fmt(Math.max(0, v.total - v.used))}</td></tr>`).join("");
+
+    // per workspace
+    $("workspaces").innerHTML = list.map((w) => {
+        const left = Math.max(0, w.total - w.used.length);
+        const last = w.history.length ? w.history[w.history.length - 1] : null;
+        const act = last ? fmtTime(last.ts, last.time) : "Belum ada batch";
+        return `<tr role="row">
+            <td role="cell" class="name"><b>${esc(w.displayName)}</b><div class="small">${esc(w.originalName)}</div></td>
+            <td role="cell" data-label="Negara">${esc(w.country)}</td>
+            <td role="cell" class="n" data-label="Total">${fmt(w.total)}</td>
+            <td role="cell" class="n" data-label="Business">${fmt(sum(Object.values(w.counts.biz)))}</td>
+            <td role="cell" class="n" data-label="Terambil">${fmt(w.used.length)}</td>
+            <td role="cell" class="n" data-label="Belum terambil">${fmt(left)}</td>
+            <td role="cell" class="n" data-label="Batch">${fmt(w.history.length)}</td>
+            <td role="cell" data-label="Progres"><div class="progress" title="${pct(w.used.length, w.total)}%"><i style="width:${Math.min(100, pct(w.used.length, w.total))}%"></i></div></td>
+            <td role="cell" data-label="Aktivitas">${esc(act)}</td></tr>`;
+    }).join("");
+
+    // batch terbaru: yang punya waktu ISO dulu (terbaru), lalu batch lama
+    const all = [];
+    for (const w of list) for (const b of w.history) all.push({ w, b });
+    all.sort((x, y) => (y.b.ts || "").localeCompare(x.b.ts || ""));
+    $("recent").innerHTML = all.length
+        ? all.slice(0, 10).map(({ w, b }) => `<div class="item"><b>${esc(w.displayName)} · Batch #${b.n}</b> · ${fmt(b.count)} nomor<div class="small">${esc(fmtTime(b.ts, b.time))}${b.tierLabel ? " · " + esc(b.tierLabel) : ""} · ${esc(b.filename)}</div></div>`).join("")
+        : `<div class="small">Belum ada batch.</div>`;
+}
+
+async function renderStorage(kind) {
+    const rows = [["Penyimpanan aktif", { idb: "IndexedDB", ls: "localStorage", mem: "Memori sementara (data tidak tersimpan)" }[kind]]];
+    const est = await Store.estimate();
+    if (est && est.quota) {
+        rows.push(["Terpakai", `${fmtBytes(est.usage)} dari ${fmtBytes(est.quota)} (${pct(est.usage, est.quota)}%)`]);
+        const bar = $("storageBar");
+        bar.hidden = false;
+        bar.firstElementChild.style.width = Math.min(100, pct(est.usage, est.quota)) + "%";
+    }
+    rows.push(["Dilindungi dari penghapusan otomatis", (await Store.persisted()) ? "Ya" : "Belum (browser dapat menghapus data saat ruang penuh)"]);
+    $("storage").innerHTML = rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    $("storageCard").hidden = false;
+}
+
+let loading = false, pending = false, opened = null;
+async function load() {
+    if (loading) { pending = true; return; }          // jangan buang pembaruan yang datang saat memuat
+    loading = true;
+    $("alerts").innerHTML = "";
+    try {
+        const kind = await (opened || (opened = Store.open()));   // buka koneksi sekali saja
+        const { list, bad } = await Store.allWs();
+        if (bad) alertBox(`${bad} workspace di penyimpanan rusak dan tidak ditampilkan.`, "error");
+        if (kind === "mem") alertBox("Penyimpanan browser tidak tersedia, jadi tidak ada data untuk ditampilkan.", "error");
+
+        let legacy = null;
+        try { legacy = localStorage.getItem(LEGACY_KEY); } catch (_) { /* tidak ada akses */ }
+        if (legacy) {
+            const migrated = await Store.getKv("legacyMigrated");
+            if (!migrated) alertBox("Data versi lama (v3) terdeteksi di browser ini tetapi belum dimigrasi. Buka aplikasi utama sekali agar data dipindahkan.", "");
+            else alertBox(`Data v3 lama (${fmtBytes(legacy.length)}) masih tersimpan sebagai cadangan di browser ini. Data tersebut tidak dipakai lagi.`, "info");
+        }
+
+        if (!list.length) show("empty");
+        else { render(list.slice().sort((a, b) => (b.created || "").localeCompare(a.created || ""))); show("content"); }
+        await renderStorage(kind);
+        $("updated").textContent = "Diperbarui " + new Date().toLocaleTimeString("id-ID");
+    } catch (e) {
+        console.error(e);
+        $("errorText").textContent = (e && (e.name || e.message)) || "Kesalahan tidak diketahui";
+        show("error");
+    } finally {
+        loading = false;
+        if (pending) { pending = false; load(); }
+    }
+}
+
+$("refresh").addEventListener("click", load);
+$("retry").addEventListener("click", () => { show("loading"); load(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+let timer = null;
+if (typeof BroadcastChannel !== "undefined") {
+    try { new BroadcastChannel("nomor-vault").onmessage = () => { clearTimeout(timer); timer = setTimeout(load, 250); }; } catch (_) { /* abaikan */ }
+}
+
+window.NVAdmin = { load, Store };
+load();
+})();
+</script>
+</body>
+</html>
