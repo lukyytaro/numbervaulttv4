@@ -1,0 +1,4 @@
+{
+  "outputDirectory": ".",
+  "redirects": [{ "source": "/", "destination": "/public/", "permanent": false }]
+}
